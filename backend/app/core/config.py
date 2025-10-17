@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     backend_cors_origins: List[AnyHttpUrl] | List[str] = []
 
     # Database
-    database_url: str = "postgresql+psycopg2://postgres:postgres@localhost:5432/threadhub"
+    database_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/threadhub"
 
     # Redis
     redis_url: str = "redis://localhost:6379/0"
