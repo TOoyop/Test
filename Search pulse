@@ -1,0 +1,146 @@
+searchplus/
+├── backend/          # Node.js API server
+│   ├── src/
+│   │   ├── routes/   # API routes
+│   │   ├── services/ # Business logic
+│   │   └── types/    # TypeScript types
+└── frontend/         # React application
+    ├── src/
+    │   ├── components/ # React components
+    │   ├── hooks/     # Custom hooks
+    │   ├── services/  # API services
+    │   └── types/     # TypeScript types# Backend
+cd backend && npm test
+
+# Frontend
+cd frontend && npm test# Backend
+cd backend && npm run build
+
+# Frontend
+cd frontend && npm run builddocker-compose up -d
+#### docker-compose.yml
+```yaml
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - FRONTEND_URL=http://localhost:3000
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/package.json:/app/package.json
+    depends_on:
+      - meilisearch
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:3001
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/package.json:/app/package.json
+    depends_on:
+      - backend
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.5
+    ports:
+      - "7700:7700"
+    environment:
+      - MEILI_MASTER_KEY=masterKey
+      - MEILI_ENV=development
+    volumes:
+      - meilisearch_data:/meili_data
+
+volumes:
+  meilisearch_data:FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY . .
+RUN npm run build
+
+EXPOSE 3001
+
+CMD ["npm", "start"]FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=0 /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 3000
+
+CMD ["nginx", "-g", "daemon off;"]events {
+    worker_connections 1024;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    server {
+        listen 3000;
+        server_name localhost;
+        root /usr/share/nginx/html;
+        index index.html;
+
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+
+        location /api {
+            proxy_pass http://backend:3001;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+        }
+    }
+}PORT=3001
+FRONTEND_URL=http://localhost:3000
+MEILISEARCH_HOST=http://localhost:7700
+MEILISEARCH_API_KEY=your-api-key
+LLM_API_KEY=your-llm-api-key
+LLM_BASE_URL=https://api.openai.com/v1VITE_API_URL=http://localhost:3001# Add all files
+git add .
+
+# Initial commit
+git commit -m "Initial commit: SearchPlus application with AI summaries
+
+- React + TypeScript frontend with Tailwind CSS
+- Node.js + Express backend API
+- Search suggestions and ranked results
+- AI-powered summaries with source attribution
+- Follow-up suggestions based on search history
+- Responsive design with dark mode
+- Docker configuration for easy deployment"
+
+# Add remote origin (replace YOUR_USERNAME)
+git remote add origin https://github.com/YOUR_USERNAME/searchplus.git
+
+# Push to GitHub
+git branch -M main
+git push -u origin main# Clone
+git clone https://github.com/YOUR_USERNAME/searchplus.git
+cd searchplus
+
+# Install and run
+npm run install-all
+npm run dev
